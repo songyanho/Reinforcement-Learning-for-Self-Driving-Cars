@@ -1,0 +1,9 @@
+models/**/*
+.idea/workspace.xml
+.idea/workspace.xml
+*.pyc
+log/*
+*.psd
+*.png
+*.svg
+
