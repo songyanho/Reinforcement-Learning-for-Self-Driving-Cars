@@ -98,6 +98,7 @@ class DeepTrafficAgent:
             self.previous_states = np.zeros([1, VISION_F + VISION_B + 1, VISION_W * 2 + 1, 4])
             self.q_values = np.zeros(5)
             self.action = 2
+            self.score = 0
 
         self.count_states = self.model.increase_count_states()
 
