@@ -213,6 +213,10 @@ class Car():
                 break
 
     def relative_pos_subject(self):
+        if self.is_subject:
+            if self.emergency_brake is not None and self.emergency_brake > EMERGENCY_BRAKE_MAX_SPEED_DIFF:
+                self.score.brake_penalty()
+            return
         dvdt = self.speed - self.subject.speed
         dmds = dvdt / 3.6
         dbdm = 1.0 / 0.25
@@ -221,14 +225,11 @@ class Car():
         dbdf = dbdm * dmdf * 10.0
         self.y = self.y - dbdf
 
-        if self.subject is None:
-            if DEFAULT_CAR_POS - dbdf <= self.y < DEFAULT_CAR_POS:
-                self.score.subtract()
-            elif DEFAULT_CAR_POS - dbdf > self.y >= DEFAULT_CAR_POS:
-                self.score.add()
-            self.score.penalty()
-            if self.emergency_brake is not None and self.emergency_brake > EMERGENCY_BRAKE_MAX_SPEED_DIFF:
-                self.score.brake_penalty()
+        if DEFAULT_CAR_POS - dbdf <= self.y < DEFAULT_CAR_POS:
+            self.score.subtract()
+        elif DEFAULT_CAR_POS - dbdf > self.y >= DEFAULT_CAR_POS:
+            self.score.add()
+        self.score.penalty()
 
     def decide(self, end_episode, cache=False, is_training=True):
         if self.subject is None:
