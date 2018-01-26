@@ -10,6 +10,7 @@ class Player:
         self.agent = agent
 
         self.action_cache = 'M'
+        self.agent_action = False
 
     def decide(self, end_episode, cache=False):
         # Move forward

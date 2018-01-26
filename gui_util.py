@@ -170,10 +170,14 @@ def draw_inputs(surface, vision):
 
 
 def draw_actions(surface, action):
-    surface.blit(left_on if action == 'L' else left_off, (INPUT_VIEW_OFFSET_X, INPUT_VIEW_OFFSET_Y + 300, 34, 70))
-    surface.blit(right_on if action == 'R' else right_off, (INPUT_VIEW_OFFSET_X + 100, INPUT_VIEW_OFFSET_Y + 300, 34, 70))
-    surface.blit(brake_on if action == 'D' else brake_off, (INPUT_VIEW_OFFSET_X, INPUT_VIEW_OFFSET_Y + 370, 34, 70))
-    surface.blit(accelerate_on if action == 'A' else accelerate_off, (INPUT_VIEW_OFFSET_X + 100, INPUT_VIEW_OFFSET_Y + 370, 34, 70))
+    surface.blit(left_on if action == 'L' else left_off,
+                 (INPUT_VIEW_OFFSET_X, INPUT_VIEW_OFFSET_Y + 300, 34, 70))
+    surface.blit(right_on if action == 'R' else right_off,
+                 (INPUT_VIEW_OFFSET_X + 100, INPUT_VIEW_OFFSET_Y + 300, 34, 70))
+    surface.blit(brake_on if action == 'D' else brake_off,
+                 (INPUT_VIEW_OFFSET_X, INPUT_VIEW_OFFSET_Y + 370, 34, 70))
+    surface.blit(accelerate_on if action == 'A' else accelerate_off,
+                 (INPUT_VIEW_OFFSET_X + 100, INPUT_VIEW_OFFSET_Y + 370, 34, 70))
 
 
 class Score:

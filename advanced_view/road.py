@@ -35,7 +35,7 @@ class AdvancedRoad:
         self.surface.blit(marker_driving_view, ((self.origin_x, self.origin_y), (self.width, self.height)))
 
     def draw_road(self, frame, redraw=False, angle=0):
-        return
+        # return
         if redraw or self.road_view is None:
             size = self.road_image.get_rect().size
             driving_view = pygame.Surface((1010, 500), pygame.SRCALPHA, 32)
@@ -45,5 +45,5 @@ class AdvancedRoad:
         self.surface.blit(self.road_view, ((self.origin_x, self.origin_y), (self.width, self.height)))
 
     def draw_subject_car(self):
-        return
+        # return
         self.surface.blit(self.subject_car_image, (self.origin_x + 460, self.origin_y + 350))

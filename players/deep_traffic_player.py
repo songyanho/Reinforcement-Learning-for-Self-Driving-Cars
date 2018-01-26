@@ -8,7 +8,7 @@ class DeepTrafficPlayer(Player):
             self.car.move(self.action_cache)
             return None, None
 
-        action = 'M' # Default action
+        action = 'M'  # Default action
         if is_training and not cache:
             self.agent.remember(score, vision, end_episode=end_episode, is_training=is_training)
 

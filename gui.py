@@ -8,7 +8,14 @@ import numpy as np
 
 # Import model and GUI related modules
 from car import Car, DEFAULT_CAR_POS
-from gui_util import draw_basic_road, draw_road_overlay_safety, draw_road_overlay_vision, control_car, identify_free_lane, Score, draw_inputs, draw_actions
+from gui_util import draw_basic_road, \
+    draw_road_overlay_safety, \
+    draw_road_overlay_vision, \
+    control_car, \
+    identify_free_lane, \
+    Score, \
+    draw_inputs, \
+    draw_actions
 from deep_traffic_agent import DeepTrafficAgent
 
 # Advanced view
@@ -58,8 +65,22 @@ while config.VISUALENABLED or episode_count < config.MAX_EPISODE + config.TESTIN
     # Score object
     score = Score(score=0)
 
-    subject_car = Car(main_surface, lane_map, speed=60, y=DEFAULT_CAR_POS, lane=6, is_subject=True, score=score, agent=deep_traffic_agent)
-    object_cars = [Car(main_surface, lane_map, speed=60, y=800, lane=6, is_subject=False, subject=subject_car) for i in range(6, 7)]
+    subject_car = Car(main_surface,
+                      lane_map,
+                      speed=60,
+                      y=DEFAULT_CAR_POS,
+                      lane=6,
+                      is_subject=True,
+                      score=score,
+                      agent=deep_traffic_agent)
+    object_cars = [Car(main_surface,
+                       lane_map,
+                       speed=60,
+                       y=800,
+                       lane=6,
+                       is_subject=False,
+                       subject=subject_car)
+                   for i in range(6, 7)]
 
     frame = 0
 
@@ -119,7 +140,14 @@ while config.VISUALENABLED or episode_count < config.MAX_EPISODE + config.TESTIN
                     new_car_y = -100
                     new_car_lane = int(np.random.choice(position, 1))
                 # Decide lanes
-                new_car = Car(main_surface, lane_map, speed=new_car_speed, y=new_car_y, lane=new_car_lane, is_subject=False, subject=subject_car, score=score)
+                new_car = Car(main_surface,
+                              lane_map,
+                              speed=new_car_speed,
+                              y=new_car_y,
+                              lane=new_car_lane,
+                              is_subject=False,
+                              subject=subject_car,
+                              score=score)
                 object_cars.append(new_car)
                 if position:
                     cars.append(new_car)

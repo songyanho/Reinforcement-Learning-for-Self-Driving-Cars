@@ -81,7 +81,10 @@ class DeepTrafficAgent:
         self.count_states = self.model.get_count_states()
 
         if is_training and self.model.get_count_states() > LEARN_START and len(self.memory) > LEARN_START:
-            self.model.optimize(self.memory, learning_rate=LEARNING_RATE, batch_size=BATCH_SIZE, target_network=self.target_model)
+            self.model.optimize(self.memory,
+                                learning_rate=LEARNING_RATE,
+                                batch_size=BATCH_SIZE,
+                                target_network=self.target_model)
 
             if self.model.get_count_states() % TARGET_NETWORK_UPDATE_FREQUENCY == 0:
                 self.model.save_checkpoint(self.model.get_count_states())

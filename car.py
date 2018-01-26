@@ -11,7 +11,7 @@ from players.deep_traffic_player import DeepTrafficPlayer
 from config import VISION_B, VISION_F, VISION_W, VISUALENABLED, EMERGENCY_BRAKE_MAX_SPEED_DIFF, ROAD_VIEW_OFFSET
 
 
-MAX_SPEED = 110 # km/h
+MAX_SPEED = 110  # km/h
 
 DEFAULT_CAR_POS = 700
 
@@ -40,11 +40,11 @@ class Car():
     def __init__(self, surface, lane_map, speed=0, y=0, lane=4, is_subject=False, subject=None, score=None, agent=None):
         self.surface = surface
         self.lane_map = lane_map
-        self.sprite = red_car if is_subject else white_car
+        self.sprite = None if not VISUALENABLED else red_car if is_subject else white_car
         self.speed = min(max(speed, 0), MAX_SPEED)
         self.y = y
         self.lane = lane
-        self.x = (self.lane - 1) * 50 + 15 + 8 + ROAD_VIEW_OFFSET# (lane-1) * ROAD_WIDTH + LEFT_LANE_PADDING + WIDHT_TO_LANE_MARKING
+        self.x = (self.lane - 1) * 50 + 15 + 8 + ROAD_VIEW_OFFSET
         self.is_subject = is_subject
         self.subject = subject
         self.max_speed = -1
@@ -234,7 +234,11 @@ class Car():
 
     def decide(self, end_episode, cache=False, is_training=True):
         if self.subject is None:
-            return self.player.decide_with_vision(self.get_vision(), self.score.score, end_episode, cache=cache, is_training=is_training)
+            return self.player.decide_with_vision(self.get_vision(),
+                                                  self.score.score,
+                                                  end_episode,
+                                                  cache=cache,
+                                                  is_training=is_training)
         else:
             return self.player.decide(end_episode, cache=cache)
 
