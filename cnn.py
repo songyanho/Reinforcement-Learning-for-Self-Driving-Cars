@@ -69,18 +69,18 @@ class Cnn:
 
             net = tf.layers.max_pooling2d(inputs=net, pool_size=[2, 2], strides=2, padding='same')
 
-            net = tf.pad(net, [[0, 0], [1, 1], [1, 1], [0, 0]], "CONSTANT")
-
-            net = tf.layers.conv2d(
-                inputs=net,
-                filters=32,
-                kernel_size=[3, 3],
-                padding="valid",
-                activation=activation,
-                kernel_initializer=init,
-                name="conv2", reuse=None)
-
-            net = tf.layers.max_pooling2d(inputs=net, pool_size=[2, 2], strides=2, padding='same')
+            # net = tf.pad(net, [[0, 0], [1, 1], [1, 1], [0, 0]], "CONSTANT")
+            #
+            # net = tf.layers.conv2d(
+            #     inputs=net,
+            #     filters=32,
+            #     kernel_size=[3, 3],
+            #     padding="valid",
+            #     activation=activation,
+            #     kernel_initializer=init,
+            #     name="conv2", reuse=None)
+            #
+            # net = tf.layers.max_pooling2d(inputs=net, pool_size=[2, 2], strides=2, padding='same')
 
             # net = tf.pad(net, [[0, 0], [1, 1], [1, 1], [0, 0]], "CONSTANT")
             #
@@ -95,9 +95,9 @@ class Cnn:
             #
             # net = tf.layers.max_pooling2d(inputs=net, pool_size=[2, 2], strides=2, padding='same')
 
-            net = tf.reshape(net, [-1, 9 * 1 * 32])
+            net = tf.reshape(net, [-1, 18 * 2 * 16])
             # net = tf.layers.dense(inputs=net, units=672, activation=activation, kernel_initializer=init)
-            net = tf.layers.dense(inputs=net, units=100, activation=activation, kernel_initializer=init)
+            # net = tf.layers.dense(inputs=net, units=100, activation=activation, kernel_initializer=init)
             net = tf.layers.dense(inputs=net, units=5, activation=None, kernel_initializer=init)
             # self.value = tf.layers.dense(inputs=net, units=1, activation=None, kernel_initializer=init)
             # self.advantage = tf.layers.dense(inputs=net, units=5, activation=None, kernel_initializer=init)
