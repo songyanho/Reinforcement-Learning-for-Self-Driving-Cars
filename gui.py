@@ -79,7 +79,6 @@ while config.VISUALENABLED or episode_count < config.MAX_EPISODE + config.TESTIN
                        y=800,
                        lane=6,
                        is_subject=False,
-                       score=score,
                        subject=subject_car)
                    for i in range(6, 7)]
 
