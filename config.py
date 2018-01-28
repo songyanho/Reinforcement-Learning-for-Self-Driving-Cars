@@ -36,7 +36,7 @@ ROUND = int(os.environ.get('ROUND', 1))
 
 IDENTIFIER = os.environ.get('IDENTIFIER', 'CV')
 
-MODEL_NAME = '{}_R{}__DQN__lr={}_input=36-3_conv=1_FC=1_nn=5_batch={}'\
+MODEL_NAME = '{}_R{}__DQN__lr={}_input=36-3_conv=2_FC=2_nn=100-5_batch={}'\
     .format(IDENTIFIER, ROUND, LEARNING_RATE, BATCH_SIZE)
 
 ROAD_VIEW_OFFSET = 1010
