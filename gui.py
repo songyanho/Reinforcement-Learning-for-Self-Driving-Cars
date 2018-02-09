@@ -43,9 +43,9 @@ if config.VISUALENABLED:
 
     myfont = pygame.font.SysFont('Comic Sans MS', 30)
 
-    main_surface = pygame.display.set_mode((1600, 1000), pygame.DOUBLEBUF | pygame.HWSURFACE)
+    main_surface = pygame.display.set_mode((1600, 800), pygame.DOUBLEBUF | pygame.HWSURFACE)
 
-    advanced_road = AdvancedRoad(main_surface, 0, 500, 1010, 500)
+    advanced_road = AdvancedRoad(main_surface, 0, 300, 1010, 500)
 else:
     os.environ["SDL_VIDEODRIVER"] = "dummy"
     main_surface = None
@@ -59,8 +59,8 @@ speed_counter_avg = []
 action_stats = np.zeros(5, np.int32)
 
 # New episode/game round
-while config.VISUALENABLED or episode_count < config.MAX_EPISODE + config.TESTING_EPISODE:
-    is_training = episode_count < config.MAX_EPISODE and not config.VISUALENABLED
+while config.DL_IS_TRAINING or episode_count < config.MAX_EPISODE + config.TESTING_EPISODE:
+    is_training = config.DL_IS_TRAINING and episode_count < config.MAX_EPISODE and not config.VISUALENABLED
 
     # Score object
     score = Score(score=0)
@@ -187,6 +187,7 @@ while config.VISUALENABLED or episode_count < config.MAX_EPISODE + config.TESTIN
                 # Get prediction from DeepTrafficAgent
                 q_values, temp_action = car.decide(game_ended, cache=cache, is_training=is_training)
                 if not cache:
+                    subject_car_action = temp_action
                     q_values = np.sum(q_values)
                     if not is_training:
                         action_stats[deep_traffic_agent.get_action_index(temp_action)] += 1
@@ -231,12 +232,13 @@ while config.VISUALENABLED or episode_count < config.MAX_EPISODE + config.TESTIN
             advanced_road.draw_road(frame, frame == 0 or subject_car.switching_lane >= 0)
             advanced_road.animate_road_marker(frame)
             advanced_road.draw_subject_car()
+            advanced_road.draw_car(object_cars, subject_car)
 
             # collision detection
             pygame.event.poll()
             pygame.display.flip()
 
-            fpsClock.tick(200 if config.VISUALENABLED else 2)
+            fpsClock.tick(200)
 
         frame += 1
         speed_counter.append(subject_car.speed)
