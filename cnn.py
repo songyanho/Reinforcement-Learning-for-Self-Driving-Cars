@@ -3,7 +3,7 @@ import os
 import sys
 import numpy as np
 import random
-from config import VISION_W, VISION_F, VISION_B, ROUND
+from config import VISION_W, VISION_F, VISION_B, ROUND, DL_IS_TRAINING
 
 checkpoint_dir = 'models'
 
@@ -174,7 +174,7 @@ class Cnn:
             self.session.run(self.init_graph)
 
     def save_checkpoint(self, current_iteration):
-        if not self.main:
+        if not self.main or not DL_IS_TRAINING:
             return False
         """Save all variables of the TensorFlow graph to a checkpoint."""
         print("Save checkpoint")

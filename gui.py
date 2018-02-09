@@ -59,8 +59,8 @@ speed_counter_avg = []
 action_stats = np.zeros(5, np.int32)
 
 # New episode/game round
-while config.VISUALENABLED or episode_count < config.MAX_EPISODE + config.TESTING_EPISODE:
-    is_training = episode_count < config.MAX_EPISODE and not config.VISUALENABLED
+while not config.DL_IS_TRAINING or episode_count < config.MAX_EPISODE + config.TESTING_EPISODE:
+    is_training = config.DL_IS_TRAINING and episode_count < config.MAX_EPISODE and not config.VISUALENABLED
 
     # Score object
     score = Score(score=0)
