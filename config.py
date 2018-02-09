@@ -4,7 +4,7 @@ import os
 GOAL = 30
 DELAY = 4
 
-VISION_W = 1  # less than 7
+VISION_W = 2  # less than 7
 VISION_F = 21  # less than 70
 VISION_B = 14  # less than 30
 
@@ -37,7 +37,7 @@ ROUND = int(os.environ.get('ROUND', 1))
 
 IDENTIFIER = os.environ.get('IDENTIFIER', 'CV')
 
-MODEL_NAME = '{}_R{}__DQN__lr={}_input=36-3_conv=2_FC=2_nn=100-5_batch={}'\
+MODEL_NAME = '{}_R{}__DQN__lr={}_input=36-5_conv=2_FC=2_nn=100-5_batch={}'\
     .format(IDENTIFIER, ROUND, LEARNING_RATE, BATCH_SIZE)
 
 ROAD_VIEW_OFFSET = 1010
