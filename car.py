@@ -8,7 +8,9 @@ from players.aggresive_player import AggresivePlayer
 from players.sticky_player import StickyPlayer
 from players.deep_traffic_player import DeepTrafficPlayer
 
-from config import VISION_B, VISION_F, VISION_W, VISUALENABLED, EMERGENCY_BRAKE_MAX_SPEED_DIFF, ROAD_VIEW_OFFSET
+from config import VISION_B, VISION_F, VISION_W, \
+    VISUALENABLED, EMERGENCY_BRAKE_MAX_SPEED_DIFF, ROAD_VIEW_OFFSET, \
+    VISUAL_VISION_B, VISUAL_VISION_F, VISUAL_VISION_W
 
 
 MAX_SPEED = 110  # km/h
@@ -124,7 +126,8 @@ class Car():
                     self.switching_lane = self.lane + 1
                     self.identify()
                 else:
-                    self.score.action_mismatch_penalty()
+                    if self.subject is None:
+                        self.score.action_mismatch_penalty()
                     return 'M'
         if direction == 'L':
             if 'L' in directions:
@@ -132,7 +135,8 @@ class Car():
                     self.switching_lane = self.lane - 1
                     self.identify()
                 else:
-                    self.score.action_mismatch_penalty()
+                    if self.subject is None:
+                        self.score.action_mismatch_penalty()
                     return 'M'
         return direction
 
@@ -233,11 +237,17 @@ class Car():
 
     def decide(self, end_episode, cache=False, is_training=True):
         if self.subject is None:
-            return self.player.decide_with_vision(self.get_vision(),
+            q_values, result = self.player.decide_with_vision(self.get_vision(),
                                                   self.score.score,
                                                   end_episode,
                                                   cache=cache,
                                                   is_training=is_training)
+            # Check for recent lane switching
+            if result == 'L' or result == 'R':
+                if (result == 'L' and 4 in self.player.agent.previous_actions) or \
+                        (result == 'R' and 3 in self.player.agent.previous_actions):
+                    self.score.switching_lane_penalty()
+            return q_values, result
         else:
             return self.player.decide(end_episode, cache=cache)
 
@@ -281,3 +291,21 @@ class Car():
         vision = np.reshape(vision, [VISION_F + VISION_B + 1, VISION_W * 2 + 1, 1])
         return vision
 
+    def get_subjective_vision(self):
+        min_x = min(max(0, self.lane - 1 - VISUAL_VISION_W), 6)
+        max_x = min(max(0, self.lane - 1 + VISUAL_VISION_W), 6)
+        input_min_xx = self.lane - 1 - VISUAL_VISION_W
+        input_max_xx = self.lane - 1 + VISUAL_VISION_W
+
+        input_min_y = int(math.floor(self.y / 10.0)) - VISUAL_VISION_F
+        input_max_y = int(math.floor(self.y / 10.0)) + VISUAL_VISION_B
+        min_y = min(max(0, input_min_y), 100)
+        max_y = min(max(0, input_max_y), 100)
+
+        cars = [
+            (self.lane_map[y][x].lane, int(math.floor(self.lane_map[y][x].y / 10.0)))
+            for y in range(min_y, max_y + 1)
+            for x in range(min_x, max_x + 1)
+            if self.lane_map[y][x] != 0 and self.lane_map[y][x].subject is not None]
+
+        return cars

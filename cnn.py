@@ -56,6 +56,10 @@ class Cnn:
                                     shape=[None, VISION_B + VISION_F + 1, VISION_W * 2 + 1, 4],
                                     name='x')
 
+            self.actions = tf.placeholder(dtype=tf.float32,
+                                          shape=[None, 4],
+                                          name='actions')
+
             net = tf.pad(self.x, [[0, 0], [1, 1], [1, 1], [0, 0]], "CONSTANT")
 
             net = tf.layers.conv2d(
@@ -96,8 +100,15 @@ class Cnn:
             # net = tf.layers.max_pooling2d(inputs=net, pool_size=[2, 2], strides=2, padding='same')
 
             net = tf.reshape(net, [-1, 9 * 1 * 32])
+
+            nnet = tf.reshape(self.actions, [-1, 4])
+            nnet = tf.layers.dense(inputs=nnet, units=4, activation=activation, kernel_initializer=init)
+            nnet = tf.layers.dense(inputs=nnet, units=4, activation=activation, kernel_initializer=init)
+
+            net = tf.concat([net, nnet], 1)
+
             # net = tf.layers.dense(inputs=net, units=672, activation=activation, kernel_initializer=init)
-            # net = tf.layers.dense(inputs=net, units=100, activation=activation, kernel_initializer=init)
+            net = tf.layers.dense(inputs=net, units=100, activation=activation, kernel_initializer=init)
             net = tf.layers.dense(inputs=net, units=5, activation=None, kernel_initializer=init)
             # self.value = tf.layers.dense(inputs=net, units=1, activation=None, kernel_initializer=init)
             # self.advantage = tf.layers.dense(inputs=net, units=5, activation=None, kernel_initializer=init)
@@ -184,7 +195,7 @@ class Cnn:
 
         print("Saved checkpoint.")
 
-    def get_q_values(self, states):
+    def get_q_values(self, states, actions):
         """
         Calculate and return the estimated Q-values for the given states.
         A single state contains two images (or channels): The most recent
@@ -200,22 +211,21 @@ class Cnn:
         """
 
         # Create a feed-dict for inputting the states to the Neural Network.
-        feed_dict = {self.x: states}
+        feed_dict = {self.x: states, self.actions: [actions]}
 
         # Use TensorFlow to calculate the estimated Q-values for these states.
         values = self.session.run([self.q_values], feed_dict=feed_dict)
 
         return values
 
-    def optimize(self, memory, min_epochs=1.0, max_epochs=10,
-                 batch_size=128,
-                 learning_rate=1e-3, target_network=None):
+    def optimize(self, memory, batch_size=128, learning_rate=1e-3, target_network=None):
         # Buffer for storing the loss-values of the most recent batches.
         loss_history = np.zeros(100, dtype=float)
 
-        states, targets = self.get_memory_component(memory, batch_size, target_network=target_network)
+        states, targets, actions = self.get_memory_component(memory, batch_size, target_network=target_network)
 
         feed_dict = {self.x: states,
+                     self.actions: actions,
                      self.q_values_new: targets,
                      self.learning_rate: learning_rate}
 
@@ -233,22 +243,24 @@ class Cnn:
     def get_memory_component(self, memory, batch_size, target_network=None):
         minibatch = random.sample(memory, batch_size)
         states = []
+        actions = []
         targets = []
-        for index, (state, next_state, action, reward, end_episode) in enumerate(minibatch):
+        for index, (state, next_state, action, reward, end_episode, _actions, next_actions) in enumerate(minibatch):
             states.append(state)
+            actions.append(_actions)
             target = reward
             if not end_episode:
-                q_values = target_network.get_q_values(next_state)[0][0] \
+                q_values = target_network.get_q_values(next_state, next_actions)[0][0] \
                     if target_network else \
-                    self.get_q_values(next_state)[0][0]
+                    self.get_q_values(next_state, next_actions)[0][0]
                 target = reward + GAMMA * np.max(q_values)
 
-            current = self.get_q_values(state)[0][0]
+            current = self.get_q_values(state, _actions)[0][0]
             current[action] = target
             targets.append(current)
         states = np.array(states).reshape(-1, VISION_B + VISION_F + 1, VISION_W * 2 + 1, 4)
         targets = np.array(targets).reshape(-1, 5)
-        return states, targets
+        return states, targets, actions
 
     def get_weights_variable(self, layer_name):
         """

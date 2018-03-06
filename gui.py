@@ -43,9 +43,9 @@ if config.VISUALENABLED:
 
     myfont = pygame.font.SysFont('Comic Sans MS', 30)
 
-    main_surface = pygame.display.set_mode((1600, 1000), pygame.DOUBLEBUF | pygame.HWSURFACE)
+    main_surface = pygame.display.set_mode((1600, 800), pygame.DOUBLEBUF | pygame.HWSURFACE)
 
-    advanced_road = AdvancedRoad(main_surface, 0, 500, 1010, 500)
+    advanced_road = AdvancedRoad(main_surface, 0, 300, 1010, 500, lane=6)
 else:
     os.environ["SDL_VIDEODRIVER"] = "dummy"
     main_surface = None
@@ -69,7 +69,7 @@ while not config.DL_IS_TRAINING or episode_count < config.MAX_EPISODE + config.T
                       lane_map,
                       speed=60,
                       y=DEFAULT_CAR_POS,
-                      lane=6,
+                      lane=4,
                       is_subject=True,
                       score=score,
                       agent=deep_traffic_agent)
@@ -126,7 +126,7 @@ while not config.DL_IS_TRAINING or episode_count < config.MAX_EPISODE + config.T
         available_lanes_for_new_car = identify_free_lane(cars)
 
         # Add more cars to the scene
-        if len(cars) < 20 and np.random.standard_normal(1)[0] >= 0:
+        if len(cars) < 40 and np.random.standard_normal(1)[0] >= 0:
             # Decide position(Front or back)
             map_position = np.random.choice([0, 1], 1)[0]
             position = available_lanes_for_new_car[map_position]
@@ -228,15 +228,13 @@ while not config.DL_IS_TRAINING or episode_count < config.MAX_EPISODE + config.T
             draw_actions(main_surface, subject_car_action)
 
             # Setup advanced view
-            advanced_road.draw_road(frame, frame == 0 or subject_car.switching_lane >= 0)
-            advanced_road.animate_road_marker(frame)
-            advanced_road.draw_subject_car()
+            # advanced_road.draw(frame, subject_car)
 
             # collision detection
             pygame.event.poll()
             pygame.display.flip()
 
-            fpsClock.tick(200 if config.VISUALENABLED else 2)
+            fpsClock.tick(50)
 
         frame += 1
         speed_counter.append(subject_car.speed)

@@ -62,7 +62,7 @@ if config.VISUALENABLED:
     # right_off = pygame.transform.scale(right_off, (34, 70))
 
 
-def draw_dashed_line(surf, color, start_pos, end_pos, width=1, dash_length=10):
+def draw_dashed_line(surf, color, start_pos, end_pos, width=1, dash_length=10, fsnl=False):
     if not config.VISUALENABLED:
         return
 
@@ -71,8 +71,18 @@ def draw_dashed_line(surf, color, start_pos, end_pos, width=1, dash_length=10):
     displacement = target - origin
     length = len(displacement)
     slope = displacement/length
+    loop = length / dash_length
+    if fsnl:
+        for index in range(0, loop * 2, 4):
+            start = origin + (slope * index * dash_length)
+            dash_length *= 1.1
+            end = origin + (slope * (index + 1) * dash_length)
+            pygame.draw.line(surf, color, start.get(), end.get(), width)
+            if start.x > length * 2:
+                break
+        return
 
-    for index in range(0, length/dash_length, 2):
+    for index in range(0, loop, 2):
         start = origin + (slope * index * dash_length)
         end = origin + (slope * (index + 1) * dash_length)
         pygame.draw.line(surf, color, start.get(), end.get(), width)
@@ -201,4 +211,7 @@ class Score:
 
     def action_mismatch_penalty(self):
         self.score -= config.MISMATCH_ACTION_PENALTY
+
+    def switching_lane_penalty(self):
+        self.score += config.SWITCHING_LANE_PENALTY
 
