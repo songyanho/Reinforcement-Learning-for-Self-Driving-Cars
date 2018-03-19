@@ -1,5 +1,6 @@
 import tensorflow as tf
 import os
+import sys
 import numpy as np
 import random
 from config import VISION_W, VISION_F, VISION_B, ROUND, DL_IS_TRAINING
@@ -100,11 +101,11 @@ class Cnn:
 
             net = tf.reshape(net, [-1, 9 * 1 * 32])
 
-            # nnet = tf.reshape(self.actions, [-1, 4])
-            # nnet = tf.layers.dense(inputs=nnet, units=4, activation=activation, kernel_initializer=init)
-            # nnet = tf.layers.dense(inputs=nnet, units=4, activation=activation, kernel_initializer=init)
-            #
-            # net = tf.concat([net, nnet], 1)
+            nnet = tf.reshape(self.actions, [-1, 4])
+            nnet = tf.layers.dense(inputs=nnet, units=4, activation=activation, kernel_initializer=init)
+            nnet = tf.layers.dense(inputs=nnet, units=4, activation=activation, kernel_initializer=init)
+
+            net = tf.concat([net, nnet], 1)
 
             # net = tf.layers.dense(inputs=net, units=672, activation=activation, kernel_initializer=init)
             net = tf.layers.dense(inputs=net, units=100, activation=activation, kernel_initializer=init)

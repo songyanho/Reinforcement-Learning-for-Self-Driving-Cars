@@ -24,6 +24,8 @@ class DeepTrafficAgent:
 
         # self.state = np.zeros([1, VISION_F + VISION_B + 1, VISION_W * 2 + 1, 1])
         self.previous_states = np.zeros([1, VISION_F + VISION_B + 1, VISION_W * 2 + 1, 4])
+        self.previous_actions = np.zeros([4])
+        self.previous_actions.fill(2)
         self.q_values = np.zeros(5)
         self.action = 2
 
@@ -56,7 +58,9 @@ class DeepTrafficAgent:
                     previous_states[n][y][x].append(state[y][x])
         self.previous_states = np.array(previous_states, dtype=int)
         self.previous_states = self.previous_states.reshape(1, VISION_F + VISION_B + 1, VISION_W * 2 + 1, 4)
-        self.q_values = self.model.get_q_values(states=self.previous_states)
+        self.previous_actions = np.roll(self.previous_actions, -1)
+        self.previous_actions[3] = self.action
+        self.q_values = self.model.get_q_values(self.previous_states, self.previous_actions)
         self.q_values = self.q_values[0][0]
 
         if is_training and self.epsilon_linear.get_value(iteration=self.model.get_count_states()) > uniform(0, 1):
@@ -78,6 +82,10 @@ class DeepTrafficAgent:
                     previous_states[n][y][x].append(next_state[y][x])
         next_state = np.array(previous_states).reshape(-1, VISION_F + VISION_B + 1, VISION_W * 2 + 1, 4)
 
+        next_actions = self.previous_actions.copy()
+        next_actions = np.roll(next_actions, -1)
+        next_actions[3] = self.action
+
         self.count_states = self.model.get_count_states()
 
         if is_training and self.model.get_count_states() > LEARN_START and len(self.memory) > LEARN_START:
@@ -91,14 +99,24 @@ class DeepTrafficAgent:
                 self.target_model.load_checkpoint()
                 self.model.log_target_network_update()
                 print("Target network updated")
+            elif self.model.get_count_states() % 1000 == 0:
+                self.model.save_checkpoint(self.model.get_count_states())
 
         if len(self.memory) > MAX_MEM:
             self.memory.popleft()
-        self.memory.append((self.previous_states, next_state, self.action, reward - self.score, end_episode))
+        self.memory.append((self.previous_states,
+                            next_state,
+                            self.action,
+                            reward - self.score,
+                            end_episode,
+                            self.previous_actions,
+                            next_actions))
         self.score = reward
 
         if end_episode:
             self.previous_states = np.zeros([1, VISION_F + VISION_B + 1, VISION_W * 2 + 1, 4])
+            self.previous_actions = np.zeros([4])
+            self.previous_actions.fill(2)
             self.q_values = np.zeros(5)
             self.action = 2
             self.score = 0

@@ -16,4 +16,7 @@ class StickyPlayer(Player):
         else:
             action = np.random.choice(['A', 'M', 'D'])
 
+        self.actions.rotate(-1)
+        self.actions[len(self.actions) - 1] = action
+
         self.car.move(action)

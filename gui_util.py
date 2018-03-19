@@ -1,11 +1,19 @@
 import math
 import os
 import pygame
+from PIL import Image
+from advanced_view.gauge import GaugeDraw
+from pygame import gfxdraw
 from random import randint
 
 from car import MAX_SPEED, VISION_F, VISION_W, VISION_B
 import config
 from config import ROAD_VIEW_OFFSET, INPUT_VIEW_OFFSET_X, INPUT_VIEW_OFFSET_Y
+
+
+pygame.font.init()
+font_28 = pygame.font.Font(os.path.join('./advanced_view/fonts/digitize.ttf'), 28)
+font_60 = pygame.font.Font(os.path.join('./advanced_view/fonts/digitize.ttf'), 60)
 
 
 class Point:
@@ -45,21 +53,13 @@ IMAGE_PATH = './images'
 
 if config.VISUALENABLED:
     accelerate_on = pygame.image.load(os.path.join(IMAGE_PATH, 'accelerate_on.png'))
-    # accelerate_on = pygame.transform.scale(accelerate_on, (34, 70))
     accelerate_off = pygame.image.load(os.path.join(IMAGE_PATH, 'accelerate_off.png'))
-    # accelerate_off = pygame.transform.scale(accelerate_off, (34, 70))
     brake_on = pygame.image.load(os.path.join(IMAGE_PATH, 'brake_on.png'))
-    # brake_on = pygame.transform.scale(brake_on, (34, 70))
     brake_off = pygame.image.load(os.path.join(IMAGE_PATH, 'brake_off.png'))
-    # brake_off = pygame.transform.scale(brake_off, (34, 70))
     left_on = pygame.image.load(os.path.join(IMAGE_PATH, 'left_on.png'))
-    # left_on = pygame.transform.scale(left_on, (34, 70))
     left_off = pygame.image.load(os.path.join(IMAGE_PATH, 'left_off.png'))
-    # left_off = pygame.transform.scale(left_off, (34, 70))
     right_on = pygame.image.load(os.path.join(IMAGE_PATH, 'right_on.png'))
-    # right_on = pygame.transform.scale(right_on, (34, 70))
     right_off = pygame.image.load(os.path.join(IMAGE_PATH, 'right_off.png'))
-    # right_off = pygame.transform.scale(right_off, (34, 70))
 
 
 def draw_dashed_line(surf, color, start_pos, end_pos, width=1, dash_length=10):
@@ -71,11 +71,41 @@ def draw_dashed_line(surf, color, start_pos, end_pos, width=1, dash_length=10):
     displacement = target - origin
     length = len(displacement)
     slope = displacement/length
+    loop = length / dash_length
 
-    for index in range(0, length/dash_length, 2):
+    for index in range(0, loop, 2):
         start = origin + (slope * index * dash_length)
         end = origin + (slope * (index + 1) * dash_length)
-        pygame.draw.line(surf, color, start.get(), end.get(), width)
+        gfxdraw.filled_polygon(surf, (
+            (int(start.x), int(start.y)),
+            (int(start.x) + width, int(start.y)),
+            (int(end.x) + width, int(end.y)),
+            (int(end.x), int(end.y))
+        ), color)
+
+
+def draw_dashed_line_delay(surf, color, start_pos, end_pos, width=1, dash_length=10, delay=0):
+    if not config.VISUALENABLED:
+        return
+
+    origin = Point(start_pos)
+    target = Point(end_pos)
+    displacement = target - origin
+    length = len(displacement)
+    slope = displacement/length
+    loop = length / dash_length
+
+    origin = origin + (slope * delay * 10)
+
+    for index in range(0, loop + 1, 2):
+        start = origin + (slope * index * dash_length)
+        end = origin + (slope * (index + 1) * dash_length)
+        gfxdraw.filled_polygon(surf, (
+            (int(start.x), int(start.y)),
+            (int(start.x) + width, int(start.y)),
+            (int(end.x) + width, int(end.y)),
+            (int(end.x), int(end.y))
+        ), color)
 
 
 def draw_basic_road(surface, speed):
@@ -84,9 +114,9 @@ def draw_basic_road(surface, speed):
 
     surface.fill(white)
     # Left most lane marking
-    pygame.draw.line(surface, grey, (ROAD_VIEW_OFFSET + 13, -10), (ROAD_VIEW_OFFSET + 13, 1000), 5)
+    pygame.draw.line(surface, black, (ROAD_VIEW_OFFSET + 13, -10), (ROAD_VIEW_OFFSET + 13, 1000), 5)
     # Right most lane marking
-    pygame.draw.line(surface, grey, (ROAD_VIEW_OFFSET + 367, -10), (ROAD_VIEW_OFFSET + 367, 1000), 5)
+    pygame.draw.line(surface, black, (ROAD_VIEW_OFFSET + 367, -10), (ROAD_VIEW_OFFSET + 367, 1000), 5)
 
     line_marking_offset = randint(0, 10)
     for l in range(1, 7):
@@ -161,23 +191,28 @@ def identify_free_lane(cars):
 
 
 def draw_inputs(surface, vision):
+    vision_title = font_28.render("Vision:", False, (0, 0, 0))
+    surface.blit(vision_title, (INPUT_VIEW_OFFSET_X - 10, INPUT_VIEW_OFFSET_Y))
     for y_i in range(len(vision)):
         for x_i, x in enumerate(vision[y_i]):
             pygame.draw.rect(surface, orange if x != 0 else white,
-                             (INPUT_VIEW_OFFSET_X + x_i * 10, INPUT_VIEW_OFFSET_Y + y_i * 10, 10, 10))
+                             (INPUT_VIEW_OFFSET_X + x_i * 10 + 80, INPUT_VIEW_OFFSET_Y + y_i * 10, 10, 10))
             pygame.draw.rect(surface, grey,
-                             (INPUT_VIEW_OFFSET_X + x_i * 10 + 1, INPUT_VIEW_OFFSET_Y + y_i * 10, 10, 10), 1)
+                             (INPUT_VIEW_OFFSET_X + x_i * 10 + 1 + 80, INPUT_VIEW_OFFSET_Y + y_i * 10, 10, 10), 1)
 
 
 def draw_actions(surface, action):
+    action_title = font_28.render("Action:", False, (0, 0, 0))
+    surface.blit(action_title, (INPUT_VIEW_OFFSET_X - 10, INPUT_VIEW_OFFSET_Y + 370))
+
     surface.blit(left_on if action == 'L' else left_off,
-                 (INPUT_VIEW_OFFSET_X, INPUT_VIEW_OFFSET_Y + 300, 34, 70))
+                 (INPUT_VIEW_OFFSET_X + 80, INPUT_VIEW_OFFSET_Y + 370, 34, 70))
     surface.blit(right_on if action == 'R' else right_off,
-                 (INPUT_VIEW_OFFSET_X + 100, INPUT_VIEW_OFFSET_Y + 300, 34, 70))
+                 (INPUT_VIEW_OFFSET_X + 80 + 40, INPUT_VIEW_OFFSET_Y + 370, 34, 70))
     surface.blit(brake_on if action == 'D' else brake_off,
-                 (INPUT_VIEW_OFFSET_X, INPUT_VIEW_OFFSET_Y + 370, 34, 70))
+                 (INPUT_VIEW_OFFSET_X + 80, INPUT_VIEW_OFFSET_Y + 410, 34, 70))
     surface.blit(accelerate_on if action == 'A' else accelerate_off,
-                 (INPUT_VIEW_OFFSET_X + 100, INPUT_VIEW_OFFSET_Y + 370, 34, 70))
+                 (INPUT_VIEW_OFFSET_X + 80 + 40, INPUT_VIEW_OFFSET_Y + 410, 34, 70))
 
 
 class Score:
@@ -194,11 +229,32 @@ class Score:
 
     def penalty(self):
         # Penalty over time
-        self.score -= config.CONSTANT_PENALTY
+        self.score += config.CONSTANT_PENALTY
 
     def brake_penalty(self):
-        self.score -= config.EMERGENCY_BRAKE_PENALTY
+        self.score += config.EMERGENCY_BRAKE_PENALTY
 
     def action_mismatch_penalty(self):
-        self.score -= config.MISMATCH_ACTION_PENALTY
+        self.score += config.MISMATCH_ACTION_PENALTY
 
+    def switching_lane_penalty(self):
+        self.score += config.SWITCHING_LANE_PENALTY
+
+
+def draw_gauge(surface, speed):
+    im = Image.new("RGB", (200, 200), (255, 255, 255, 0))
+    g = GaugeDraw(im, 0, 110)
+    g.render_simple_gauge(value=speed, major_ticks=10, minor_ticks=5, label="{}kmh".format(speed))
+
+    gauge = pygame.image.fromstring(im.tobytes(), im.size, im.mode)
+
+    speed_title = font_28.render("Speed:", False, (0, 0, 0))
+    surface.blit(speed_title, (INPUT_VIEW_OFFSET_X - 10, 10))
+    surface.blit(gauge, ((INPUT_VIEW_OFFSET_X - 10, 35), (200, 200)))
+
+
+def draw_score(surface, score):
+    score_title = font_28.render("Score:", False, (0, 0, 0))
+    score = font_60.render(str(int(score)), False, (0, 0, 0))
+    surface.blit(score_title, (INPUT_VIEW_OFFSET_X - 10, 245))
+    surface.blit(score, (INPUT_VIEW_OFFSET_X - 10 + 80, 240))
