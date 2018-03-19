@@ -65,6 +65,9 @@ class Car():
                 StickyPlayer(self)
             ]) if not self.is_subject else DeepTrafficPlayer(self, agent=agent)
 
+        self.hard_brake_count = 0
+        self.alternate_line_switching = 0
+
     def identify(self):
         min_box = int(math.floor(self.y / 10.0)) - 1
         max_box = int(math.ceil(self.y / 10.0))
@@ -220,6 +223,8 @@ class Car():
         if self.is_subject:
             if self.emergency_brake is not None and self.emergency_brake > EMERGENCY_BRAKE_MAX_SPEED_DIFF:
                 self.score.brake_penalty()
+                self.hard_brake_count += 1
+            self.emergency_brake = None
             return
         dvdt = self.speed - self.subject.speed
         dmds = dvdt / 3.6
@@ -247,6 +252,7 @@ class Car():
                 if (result == 'L' and 4 in self.player.agent.previous_actions) or \
                         (result == 'R' and 3 in self.player.agent.previous_actions):
                     self.score.switching_lane_penalty()
+                    self.alternate_line_switching += 1
             return q_values, result
         else:
             return self.player.decide(end_episode, cache=cache)

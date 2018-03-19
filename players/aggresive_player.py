@@ -9,11 +9,17 @@ class AggresivePlayer(Player):
         # switch lane
         action = 'M'
 
+        self.actions.rotate(-1)
+        self.actions[len(self.actions) - 1] = 'M'
+
         if self.car.speed < self.min_speed and self.car.switching_lane < 0:
             # If car in front
             if self.car_in_front():
-                self.car.switch_lane(np.random.choice(['L', 'R']))
-                return
+                plan_direction = np.random.choice(['L', 'R'])
+                if plan_direction not in self.actions:
+                    self.actions[len(self.actions) - 1] = plan_direction
+                    self.car.switch_lane(plan_direction)
+                    return
 
         if self.car.speed > self.max_speed:
             action = 'D'
@@ -21,6 +27,8 @@ class AggresivePlayer(Player):
             action = 'A'
         else:
             action = np.random.choice(['A', 'M'])
+
+        self.actions[len(self.actions) - 1] = action
 
         self.car.move(action)
 

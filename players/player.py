@@ -1,5 +1,6 @@
 import numpy as np
 import math
+from collections import deque
 
 
 class Player:
@@ -12,6 +13,8 @@ class Player:
         self.action_cache = 'M'
         self.agent_action = False
 
+        self.actions = deque(['M', 'M', 'M', 'M'])
+
     def decide(self, end_episode, cache=False):
         # Move forward
         if self.car.speed < self.min_speed:
@@ -20,6 +23,9 @@ class Player:
             action = 'D'
         else:
             action = 'M'
+
+        self.actions.rotate(-1)
+        self.actions[len(self.actions) - 1] = action
 
         self.car.move(action)
 
