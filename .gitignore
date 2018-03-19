@@ -4,6 +4,5 @@ models/**/*
 *.pyc
 log/*
 *.psd
-*.png
 *.svg
 
