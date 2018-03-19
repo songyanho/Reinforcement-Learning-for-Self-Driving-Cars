@@ -1,5 +1,6 @@
 import tensorflow as tf
 import os
+import sys
 import numpy as np
 import random
 from config import VISION_W, VISION_F, VISION_B, ROUND, DL_IS_TRAINING
@@ -59,8 +60,8 @@ class Cnn:
                                           shape=[None, 4],
                                           name='actions')
 
-            # Conv1
             net = tf.pad(self.x, [[0, 0], [1, 1], [1, 1], [0, 0]], "CONSTANT")
+
             net = tf.layers.conv2d(
                 inputs=net,
                 filters=16,
@@ -69,10 +70,11 @@ class Cnn:
                 activation=activation,
                 kernel_initializer=init,
                 name='conv1', reuse=None)
+
             net = tf.layers.max_pooling2d(inputs=net, pool_size=[2, 2], strides=2, padding='same')
 
-            # Conv2
             net = tf.pad(net, [[0, 0], [1, 1], [1, 1], [0, 0]], "CONSTANT")
+
             net = tf.layers.conv2d(
                 inputs=net,
                 filters=32,
@@ -81,20 +83,39 @@ class Cnn:
                 activation=activation,
                 kernel_initializer=init,
                 name="conv2", reuse=None)
+
             net = tf.layers.max_pooling2d(inputs=net, pool_size=[2, 2], strides=2, padding='same')
+
+            # net = tf.pad(net, [[0, 0], [1, 1], [1, 1], [0, 0]], "CONSTANT")
+            #
+            # net = tf.layers.conv2d(
+            #     inputs=net,
+            #     filters=32,
+            #     kernel_size=[3, 3],
+            #     padding="valid",
+            #     activation=activation,
+            #     kernel_initializer=init,
+            #     name="conv3", reuse=None)
+            #
+            # net = tf.layers.max_pooling2d(inputs=net, pool_size=[2, 2], strides=2, padding='same')
+
             net = tf.reshape(net, [-1, 9 * 1 * 32])
 
-            # ActionDense1
             nnet = tf.reshape(self.actions, [-1, 4])
             nnet = tf.layers.dense(inputs=nnet, units=4, activation=activation, kernel_initializer=init)
             nnet = tf.layers.dense(inputs=nnet, units=4, activation=activation, kernel_initializer=init)
 
-            # Merge Conv2 and ActionDense1
             net = tf.concat([net, nnet], 1)
 
+            # net = tf.layers.dense(inputs=net, units=672, activation=activation, kernel_initializer=init)
             net = tf.layers.dense(inputs=net, units=100, activation=activation, kernel_initializer=init)
             net = tf.layers.dense(inputs=net, units=5, activation=None, kernel_initializer=init)
+            # self.value = tf.layers.dense(inputs=net, units=1, activation=None, kernel_initializer=init)
+            # self.advantage = tf.layers.dense(inputs=net, units=5, activation=None, kernel_initializer=init)
 
+            # The output of the Neural Network is the estimated Q-values
+            # for each possible action in the game-environment.
+            # self.q_values = self.value + (self.advantage - tf.reduce_mean(self.advantage, axis=1, keep_dims=True))
             self.q_values = net
 
             # TensorFlow has a built-in loss-function for doing regression:
@@ -156,9 +177,8 @@ class Cnn:
             print("Restored checkpoint from:", ckpt)
         except Exception as e:
             if not DL_IS_TRAINING:
-                print(e)
-                raise Exception('Failed to load checkpoint', '{}/{}'.format(checkpoint_dir, self.model_name))
-
+                raise Exception('Failed to load checkpoint')
+            print(e)
             # If the above failed for some reason, simply
             # initialize all the variables for the TensorFlow graph.
             print("Failed to restore checkpoint from:", checkpoint_dir)

@@ -15,7 +15,9 @@ from gui_util import draw_basic_road, \
     identify_free_lane, \
     Score, \
     draw_inputs, \
-    draw_actions
+    draw_actions, \
+    draw_gauge, \
+    draw_score
 from deep_traffic_agent import DeepTrafficAgent
 
 # Advanced view
@@ -37,15 +39,10 @@ if config.VISUALENABLED:
     pygame.init()
     pygame.font.init()
     pygame.display.set_caption('DeepTraffic')
-
     fpsClock = pygame.time.Clock()
-    fpsClock.tick(200)
 
-    myfont = pygame.font.SysFont('Comic Sans MS', 30)
-
-    main_surface = pygame.display.set_mode((1600, 1000), pygame.DOUBLEBUF | pygame.HWSURFACE)
-
-    advanced_road = AdvancedRoad(main_surface, 0, 500, 1010, 500)
+    main_surface = pygame.display.set_mode((1600, 800), pygame.DOUBLEBUF | pygame.HWSURFACE)
+    advanced_road = AdvancedRoad(main_surface, 0, 550, 1010, 800, lane=6)
 else:
     os.environ["SDL_VIDEODRIVER"] = "dummy"
     main_surface = None
@@ -55,12 +52,16 @@ lane_map = [[0 for x in range(7)] for y in range(100)]
 episode_count = deep_traffic_agent.model.get_count_episodes()
 
 speed_counter_avg = []
+hard_brake_avg = []
+alternate_line_switching = []
 
 action_stats = np.zeros(5, np.int32)
 
+PREDEFINED_MAX_CAR = config.MAX_SIMULATION_CAR
+
 # New episode/game round
-while config.VISUALENABLED or episode_count < config.MAX_EPISODE + config.TESTING_EPISODE:
-    is_training = episode_count < config.MAX_EPISODE and not config.VISUALENABLED
+while episode_count < config.MAX_EPISODE + config.TESTING_EPISODE * 3:
+    is_training = config.DL_IS_TRAINING and episode_count < config.MAX_EPISODE and not config.VISUALENABLED
 
     # Score object
     score = Score(score=0)
@@ -69,7 +70,7 @@ while config.VISUALENABLED or episode_count < config.MAX_EPISODE + config.TESTIN
                       lane_map,
                       speed=60,
                       y=DEFAULT_CAR_POS,
-                      lane=6,
+                      lane=4,
                       is_subject=True,
                       score=score,
                       agent=deep_traffic_agent)
@@ -126,7 +127,7 @@ while config.VISUALENABLED or episode_count < config.MAX_EPISODE + config.TESTIN
         available_lanes_for_new_car = identify_free_lane(cars)
 
         # Add more cars to the scene
-        if len(cars) < 20 and np.random.standard_normal(1)[0] >= 0:
+        if len(cars) < PREDEFINED_MAX_CAR and np.random.standard_normal(1)[0] >= 0:
             # Decide position(Front or back)
             map_position = np.random.choice([0, 1], 1)[0]
             position = available_lanes_for_new_car[map_position]
@@ -187,6 +188,7 @@ while config.VISUALENABLED or episode_count < config.MAX_EPISODE + config.TESTIN
                 # Get prediction from DeepTrafficAgent
                 q_values, temp_action = car.decide(game_ended, cache=cache, is_training=is_training)
                 if not cache:
+                    subject_car_action = temp_action
                     q_values = np.sum(q_values)
                     if not is_training:
                         action_stats[deep_traffic_agent.get_action_index(temp_action)] += 1
@@ -219,24 +221,19 @@ while config.VISUALENABLED or episode_count < config.MAX_EPISODE + config.TESTIN
 
         # Show statistics
         if config.VISUALENABLED:
-            text_surface = myfont.render(str(subject_car.speed), False, (0, 0, 0))
-            text_surface2 = myfont.render(str(score.score), False, (0, 0, 0))
-            main_surface.blit(text_surface2, (1405, 350))
-            main_surface.blit(text_surface, (1405, 400))
+            draw_score(main_surface, score.score)
 
             draw_inputs(main_surface, subject_car.get_vision())
             draw_actions(main_surface, subject_car_action)
+            draw_gauge(main_surface, subject_car.speed)
 
             # Setup advanced view
-            advanced_road.draw_road(frame, frame == 0 or subject_car.switching_lane >= 0)
-            advanced_road.animate_road_marker(frame)
-            advanced_road.draw_subject_car()
+            advanced_road.draw(frame, subject_car)
 
             # collision detection
+            fpsClock.tick(20000)
             pygame.event.poll()
             pygame.display.flip()
-
-            fpsClock.tick(200 if config.VISUALENABLED else 2)
 
         frame += 1
         speed_counter.append(subject_car.speed)
@@ -246,17 +243,41 @@ while config.VISUALENABLED or episode_count < config.MAX_EPISODE + config.TESTIN
 
     episode_count = deep_traffic_agent.model.increase_count_episodes()
     avg_speed = np.average(speed_counter)
-    print("Average speed for episode{}: {}".format(episode_count, avg_speed))
     if not is_training:
         speed_counter_avg.append(avg_speed)
         deep_traffic_agent.model.log_testing_speed(avg_speed)
     else:
+        print("Average speed for episode{}: {}".format(episode_count, avg_speed))
         deep_traffic_agent.model.log_average_speed(avg_speed)
     deep_traffic_agent.model.log_total_frame(frame)
     deep_traffic_agent.model.log_terminated(frame < config.MAX_FRAME_COUNT - 1)
     deep_traffic_agent.model.log_reward(score.score)
 
-average_test_speed = np.average(speed_counter_avg)
-print("Average speed for model{}: {}".format(model_name, average_test_speed))
-deep_traffic_agent.model.log_average_test_speed(average_test_speed)
+    deep_traffic_agent.model.log_hard_brake_count(subject_car.hard_brake_count)
+
+    if episode_count > config.MAX_EPISODE:
+        alternate_line_switching.append(subject_car.alternate_line_switching)
+        hard_brake_avg.append(subject_car.hard_brake_count)
+        if (episode_count - config.MAX_EPISODE) % config.TESTING_EPISODE == 0:
+            avg_speed = np.average(speed_counter_avg)
+            median_speed = np.median(speed_counter_avg)
+            avg_hard_brake = np.average(hard_brake_avg)
+            median_hard_brake = np.median(hard_brake_avg)
+            avg_alternate_line_switching = np.average(alternate_line_switching)
+            median_alternate_line_switching = np.median(alternate_line_switching)
+            print("Car:{},Speed:(Mean: {}, Median: {}),Hard_Brake:(Mean: {}, Median: {}), Line::(Mean: {}, Median: {})"
+                  .format(PREDEFINED_MAX_CAR, avg_speed, median_speed, avg_hard_brake, median_hard_brake,
+                          avg_alternate_line_switching, median_alternate_line_switching))
+            if abs(PREDEFINED_MAX_CAR - 40) < 1:
+                deep_traffic_agent.model.log_average_test_speed_40(avg_speed)
+                PREDEFINED_MAX_CAR = 20
+            elif abs(PREDEFINED_MAX_CAR - 20) < 1:
+                deep_traffic_agent.model.log_average_test_speed_20(avg_speed)
+                PREDEFINED_MAX_CAR = 60
+            else:
+                deep_traffic_agent.model.log_average_test_speed_60(avg_speed)
+            speed_counter_avg = []
+            hard_brake_avg = []
+            alternate_line_switching = []
+
 deep_traffic_agent.model.log_action_frequency(action_stats)
