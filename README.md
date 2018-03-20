@@ -22,6 +22,20 @@ This project implements reinforcement learning to generate a self-driving car-ag
 ![screenshot](https://raw.githubusercontent.com/songyanho/Reinforcement-Learning-for-Self-Driving-Cars/master/images/screenshot.png)
 *Simulator running under macOS High Sierra environment*
 
+## Requirements
+- Tensorflow
+- pygame
+- NumPy
+- PIL
+
+# Model architecture
+
+![architecture](https://raw.githubusercontent.com/songyanho/Reinforcement-Learning-for-Self-Driving-Cars/master/images/network_architecture.png)
+*High level model architecture design*
+
+![tensorflow structure](https://raw.githubusercontent.com/songyanho/Reinforcement-Learning-for-Self-Driving-Cars/master/images/graph_structure.png)
+*Graph structure in Tensorflow*
+
 # Results
 
 ## Average speed
@@ -60,4 +74,15 @@ This project implements reinforcement learning to generate a self-driving car-ag
 
 ![chart](https://raw.githubusercontent.com/songyanho/Reinforcement-Learning-for-Self-Driving-Cars/master/images/speed_brake_test_3.png)
 *Condition 3: Average speed against average number of emergency brake applied*
+
+# Biblography
+
+1.	Sallab, A.E., Abdou, M., Perot, E., and Yogamani, S.: ‘Deep reinforcement learning framework for autonomous driving’, Electronic Imaging, 2017, 2017, (19), pp. 70-76
+2.	Sutton, R.S.: ‘Learning to predict by the methods of temporal differences’, Machine learning, 1988, 3, (1), pp. 9-44
+3.	Bellemare, M.G., Veness, J., and Bowling, M.: ‘Investigating Contingency Awareness Using Atari 2600 Games’, in Editor (Ed.)^(Eds.): ‘Book Investigating Contingency Awareness Using Atari 2600 Games’ (2012, edn.), pp. 
+4.	Mnih, V., Kavukcuoglu, K., Silver, D., Graves, A., Antonoglou, I., Wierstra, D., and Riedmiller, M.: ‘Playing atari with deep reinforcement learning’, arXiv preprint arXiv:1312.5602, 2013
+5.	Bojarski, M., Del Testa, D., Dworakowski, D., Firner, B., Flepp, B., Goyal, P., Jackel, L.D., Monfort, M., Muller, U., and Zhang, J.: ‘End to end learning for self-driving cars’, arXiv preprint arXiv:1604.07316, 2016
+6.	Chen, C., Seff, A., Kornhauser, A., and Xiao, J.: ‘Deepdriving: Learning affordance for direct perception in autonomous driving’, in Editor (Ed.)^(Eds.): ‘Book Deepdriving: Learning affordance for direct perception in autonomous driving’ (2015, edn.), pp. 2722-2730
+7.	Mnih, V., Kavukcuoglu, K., Silver, D., Rusu, A.A., Veness, J., Bellemare, M.G., Graves, A., Riedmiller, M., Fidjeland, A.K., and Ostrovski, G.: ‘Human-level control through deep reinforcement learning’, Nature, 2015, 518, (7540), pp. 529-533
+8.	Yu, A., Palefsky-Smith, R., and Bedi, R.: ‘Deep Reinforcement Learning for Simulated Autonomous Vehicle Control’, Course Project Reports: Winter, 2016, pp. 1-7
 
