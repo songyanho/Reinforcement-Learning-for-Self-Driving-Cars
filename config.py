@@ -40,9 +40,9 @@ EPSILON_GREEDY_TEST_PROB = 0.05
 TARGET_NETWORK_UPDATE_FREQUENCY = 10000
 LEARN_START = 100000
 
-ROUND = int(os.environ.get('ROUND', 1))
+ROUND = int(os.environ.get('ROUND', 400))
 
-IDENTIFIER = os.environ.get('IDENTIFIER', 'PA')
+IDENTIFIER = os.environ.get('IDENTIFIER', 'PAA')
 
 MODEL_NAME = '{}_R{}__DQN__lr={}_input=36-3_conv=2_FC=2_nn=100-5_batch={}'\
     .format(IDENTIFIER, ROUND, LEARNING_RATE, BATCH_SIZE)

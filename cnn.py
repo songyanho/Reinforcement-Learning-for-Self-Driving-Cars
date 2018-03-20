@@ -23,8 +23,8 @@ class Cnn:
             self.checkpoint_path = os.path.join('{}/{}'.format(checkpoint_dir, model_name), "checkpoint")
 
         # Placeholder variable for inputting the learning-rate to the optimizer.
-        graph = tf.Graph()
-        with graph.as_default():
+        self.graph = tf.Graph()
+        with self.graph.as_default():
             activation = tf.nn.relu
             init = tf.truncated_normal_initializer(mean=0.0, stddev=2e-2)
 
@@ -119,7 +119,7 @@ class Cnn:
             self.init_graph = tf.global_variables_initializer()
 
             # Create a new TensorFlow session so we can run the Neural Network.
-        self.session = tf.Session(graph=graph)
+        self.session = tf.Session(graph=self.graph)
 
         # Load the most recent checkpoint if it exists,
         # otherwise initialize all the variables in the TensorFlow graph.
@@ -132,7 +132,8 @@ class Cnn:
 
             if not os.path.exists("log/round{}/{}".format(ROUND, model_name)):
                 os.mkdir("log/round{}/{}".format(ROUND, model_name))
-            self.writer = tf.summary.FileWriter("log/round{}/{}".format(ROUND, model_name), graph=tf.get_default_graph())
+            self.writer = tf.summary.FileWriter("log/round{}/{}".format(ROUND, model_name), graph=self.session.graph)
+            self.writer.flush()
 
     def close(self):
         """Close the TensorFlow session."""
@@ -154,6 +155,7 @@ class Cnn:
 
             # If we get to this point, the checkpoint was successfully loaded.
             print("Restored checkpoint from:", ckpt)
+
         except Exception as e:
             if not DL_IS_TRAINING:
                 print(e)
