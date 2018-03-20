@@ -1,6 +1,4 @@
-assasas
-
-![](http://www.ntu.edu.sg/home/sachin.mishra/img/logo.png)
+![NTU logo](http://www.ntu.edu.sg/home/sachin.mishra/img/logo.png)
 
 # Nanyang Technological University, Singapore
 # School of Computer Science and Engineering(SCSE)
