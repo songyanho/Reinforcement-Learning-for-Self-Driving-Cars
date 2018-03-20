@@ -1,10 +1,10 @@
 ![NTU logo](http://www.ntu.edu.sg/home/sachin.mishra/img/logo.png)
 
-# Nanyang Technological University, Singapore
-# School of Computer Science and Engineering(SCSE)
+Nanyang Technological University, Singapore
+School of Computer Science and Engineering(SCSE)
 ___
-# Final Year Project
-# SCE17-0434
+
+### Final Year Project: SCE17-0434
 # Reinforcement Learning for Self-Driving Cars
 ___
 
