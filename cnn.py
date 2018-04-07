@@ -177,6 +177,16 @@ class Cnn:
                         save_path=self.checkpoint_path,
                         global_step=current_iteration)
 
+        try:
+            temp_checkpoint_path = os.path.join('{}/{}'.format(checkpoint_dir, self.model_name),
+                                                "checkpoint-episode-{}".format(self.get_count_episodes()))
+
+            self.saver.save(self.session,
+                            save_path=temp_checkpoint_path,
+                            global_step=self.get_count_episodes())
+        except Exception as e:
+            print(e)
+
         print("Saved checkpoint.")
 
     def get_q_values(self, states, actions):
