@@ -1,4 +1,4 @@
-![NTU logo](http://www.ntu.edu.sg/home/sachin.mishra/img/logo.png)
+![NTU logo](https://raw.githubusercontent.com/songyanho/Reinforcement-Learning-for-Self-Driving-Cars/master/images/ntu_logo.png)
 
 Nanyang Technological University, Singapore
 
