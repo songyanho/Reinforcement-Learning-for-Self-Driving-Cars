@@ -10,7 +10,7 @@ ___
 # Reinforcement Learning for Self-Driving Cars
 ___
 
-[![youtube](https://raw.githubusercontent.com/songyanho/Reinforcement-Learning-for-Self-Driving-Cars/master/images/Youtube.png)](https://youtu.be/JFwjeUXqouA)
+[![youtube](https://raw.githubusercontent.com/songyanho/Reinforcement-Learning-for-Self-Driving-Cars/master/images/Youtube.png)](https://youtu.be/3ROVzjkkCIA)
 
 *This project is a Final Year Project carried out by **Ho Song Yan** from Nanyang Technological University, Singapore.*
 
