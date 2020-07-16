@@ -12,7 +12,9 @@ ___
 
 [![youtube](https://raw.githubusercontent.com/songyanho/Reinforcement-Learning-for-Self-Driving-Cars/master/images/Youtube.png)](https://youtu.be/3ROVzjkkCIA)
 
-*This project is a Final Year Project carried out by **Ho Song Yan** from Nanyang Technological University, Singapore.*
+- This project is a Final Year Project carried out by **Ho Song Yan** from Nanyang Technological University, Singapore.
+- Download here: [FYP2018-Final-Report.pdf](https://github.com/songyanho/Reinforcement-Learning-for-Self-Driving-Cars/blob/master/docs/FYP2018-Final%20Report-HO%20SONG%20YAN.pdf)
+- Please use this identifier to cite or link to this item: https://hdl.handle.net/10356/74098
 
 ___
 
